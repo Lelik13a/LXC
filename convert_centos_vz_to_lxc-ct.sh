@@ -281,3 +281,9 @@ EOF
     fi
 
 
+
+# create hwaddr
+
+echo "random HW Address"
+openssl rand -hex 5 | sed -e 's/\(..\)/:\1/g; s/^/fe/'
+
