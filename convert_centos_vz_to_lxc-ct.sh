@@ -39,8 +39,14 @@ fi
 
 rootfs_path=$1
 
-centos_host_ver=$( sed -e '/^CentOS /!d' -e 's/CentOS.*\srelease\s*\([0-9][0-9.]*\)\s.*/\1/' < $rootfs_path/etc/centos-release )
-release=$(expr $centos_host_ver : '\([0-9]\)')
+    if [[ -f $rootfs_path/etc/centos-release ]]
+    then
+	centos_host_ver=$( sed -e '/^CentOS /!d' -e 's/CentOS.*\srelease\s*\([0-9][0-9.]*\)\s.*/\1/' < $rootfs_path/etc/centos-release )
+	release=$(expr $centos_host_ver : '\([0-9]\)')
+    else
+	centos_host_ver="6"
+	release="6"
+    fi
 
 
 echo rootfs_path: $rootfs_path
@@ -164,9 +170,8 @@ EOF
 
 	if [ -f $rootfs_path/etc/sysconfig/network ]
 	then
-	        sed -i '/^GATEWAYDEV/#GATEWAYDEV/' $rootfs_path/etc/sysconfig/network
-	        sed -i '/^IPV6_DEFAULTDEV/#IPV6_DEFAULTDEV/' $rootfs_path/etc/sysconfig/network
 		cat $rootfs_path/etc/sysconfig/network | grep HOSTNAME >> ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
+		echo "NETWORKING=yes" > $rootfs_path/etc/sysconfig/network 
 	fi
 
 
@@ -284,6 +289,13 @@ EOF
 
 # create hwaddr
 
-echo "random HW Address"
+echo "Check network config:"
+echo "cat ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0"
+cat ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
+
+
+echo "Insert random HW address in CT config:"
+echo -n "lxc.network.hwaddr = "
 openssl rand -hex 5 | sed -e 's/\(..\)/:\1/g; s/^/fe/'
+
 
