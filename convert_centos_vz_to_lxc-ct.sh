@@ -53,6 +53,8 @@ echo rootfs_path: $rootfs_path
 echo centos_host_ver: $centos_host_ver
 echo release: $release
 
+read -p "Press [Enter] key to continue..."
+
 # --------------- configure_centos() -----------------
 
 # disable selinux in centos
@@ -179,6 +181,7 @@ EOF
 # set minimal fstab
     cat <<EOF > $rootfs_path/etc/fstab
 /dev/root               /                       rootfs   defaults        0 0
+none                    /dev/shm                tmpfs    nosuid,nodev    0 0
 EOF
 
 
@@ -203,7 +206,7 @@ end script
 EOF
 
 # console fix
-	if [ -f $rootfs_path/etc/init/console.conf ]
+	if [[ ! -f $rootfs_path/etc/init/console.conf ]]
 	then
 		cat <<EOF > $rootfs_path/etc/init/console.conf 
 # console - getty
@@ -222,7 +225,7 @@ exec /sbin/agetty -8 38400 /dev/console
 EOF
 	fi
 
-	if [ -f $rootfs_path/etc/init/tty.conf ]
+	if [[ ! -f $rootfs_path/etc/init/tty.conf ]]
 	then
 		cat <<EOF > $rootfs_path/etc/init/tty.conf 
 # tty - getty
@@ -243,7 +246,7 @@ usage 'tty TTY=/dev/ttyX  - where X is console id'
 EOF
 	fi
 
-	if [ -f $rootfs_path/etc/init/start-ttys.conf ]
+	if [[ ! -f $rootfs_path/etc/init/start-ttys.conf ]]
 	then
 		cat <<EOF > $rootfs_path/etc/init/start-ttys.conf 
 
@@ -362,7 +365,7 @@ echo "Check network config:"
 echo "cat ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0"
 cat ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
 
-
+echo ""
 echo "Insert random HW address in CT config:"
 echo ""
 echo -n "lxc.network.hwaddr = "
